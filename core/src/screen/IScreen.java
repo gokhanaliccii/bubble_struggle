@@ -12,4 +12,6 @@ public interface IScreen {
 	public void pause();
 	public void resume();
 	
+	public int getWidth();
+	public int getHeight();
 }

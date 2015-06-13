@@ -1,89 +1,124 @@
 package animation;
 
-import utility.AssetManager;
+import java.util.concurrent.ConcurrentHashMap;
+
 import utility.ImagePath;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 
 public class AnimationManager {
 
+	private static AnimationManager animationManager;
+
+	private ConcurrentHashMap<String, Animation> animationMap;
+
+	private AnimationManager() {
+
+		animationMap = new ConcurrentHashMap<String, Animation>();
+	}
+
+	public static AnimationManager getInstance() {
+
+		if (animationManager == null)
+			animationManager = new AnimationManager();
+
+		return animationManager;
+	}
+
+	public boolean cacheAnimation(String name, Animation animation) {
+
+		if (name == null || animation == null)
+			return false;
+
+		animationMap.put(name, animation);
+
+		return true;
+	}
+
+	public boolean isAnimationExistAtCache(String textureName) {
+
+		if (animationMap == null)
+			return false;
+
+		return animationMap.containsKey(textureName);
+	}
+
 	public Animation getAnimation(AnimationType type) {
 
-		AssetManager assetManager = AssetManager.getInstance();
-
-		Animation rightAnimation = assetManager.getAnimation(type.name());
-
-		if (rightAnimation != null)
-			return rightAnimation;
+		String animationPath = null;
 
 		switch (type) {
 
 		case FORWARD_WALKING:
+
+			animationPath = ImagePath.SPRITE_WALKING_FORWARD;
 			break;
 
 		case LEFT_WALKING:
 
-			return loadLeftWalkingAnimation();
+			animationPath = ImagePath.SPRITE_WALKING_LEFT;
+			break;
 
 		case RIGHT_WALKING:
 
-			return loadRightWalkingAnimation();
-
-		default:
+			animationPath = ImagePath.SPRITE_WALKING_RIGHT;
 			break;
 
+		case WEAPON:
+			
+			animationPath = ImagePath.WEAPON;
+			break;
+		default:
+			return null;
+
 		}
 
-		return null;
+		return getAtlasAnimation(animationPath, true);
 	}
 
-	private Animation loadLeftWalkingAnimation() {
+	public Animation getAtlasAnimation(String animationPath, boolean cache) {
 
-		AssetManager assetManager = AssetManager.getInstance();
-		Texture texture = assetManager
-				.getTexture(ImagePath.SPRITE_WALKING_LEFT);
+		Animation animation = getAtlasAnimation(animationPath);
 
-		Animation leftAnimation = createAnimation(texture, 35, 55, 5, 4);
+		if (!cache)
+			return animation;
 
-		assetManager.cacheAnimation(AnimationType.LEFT_WALKING.name(),
-				leftAnimation);
+		if (animation == null)
+			return null;
 
-		return leftAnimation;
+		if (isAnimationExistAtCache(animationPath))
+			return animation;
+
+		cacheAnimation(animationPath, animation);
+		return animation;
 	}
 
-	private Animation loadRightWalkingAnimation() {
+	public Animation getAtlasAnimation(String animationPath) {
 
-		AssetManager assetManager = AssetManager.getInstance();
-		Texture texture = assetManager
-				.getTexture(ImagePath.SPRITE_WALKING_RIGHT);
+		if (animationPath == null)
+			return null;
 
-		Animation rightAnimation = createAnimation(texture, 35, 55, 5, 4);
+		if (isAnimationExistAtCache(animationPath))
+			return animationMap.get(animationPath);
 
-		assetManager.cacheAnimation(AnimationType.RIGHT_WALKING.name(),
-				rightAnimation);
-
-		return rightAnimation;
+		Animation animation = loadAtlasAnimation(animationPath);
+		return animation;
 	}
 
-	private Animation createAnimation(Texture texture, int width, int height,
-			int row, int col) {
+	private Animation loadAtlasAnimation(String path) {
 
-		TextureRegion[][] txtRegion = TextureRegion.split(texture, width,
-				height);
+		TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path));
 
-		TextureRegion[] textureRegions = new TextureRegion[row * col];
+		Array<AtlasRegion> regions = atlas.getRegions();
+		if (regions == null)
+			return null;
+		float duration = 1 / (float) regions.size;
+		Animation animation = new Animation(duration, regions);
 
-		int index = 0;
-
-		for (int i = 0; i < row; i++) {
-			for (int j = 0; j < col; j++) {
-				textureRegions[index++] = txtRegion[i][j];
-			}
-		}
-
-		Animation animation = new Animation(1f / (row * col), textureRegions);
 		return animation;
 	}
 

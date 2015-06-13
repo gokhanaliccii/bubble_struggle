@@ -8,7 +8,7 @@ public class DesktopLauncher {
 	
 	public static int WIDTH = 800;
 	public static int HEIGHT = 480;
-	public static String TITLE ="Drop Example";
+	public static String TITLE ="Bubble Struggle";
 	
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();

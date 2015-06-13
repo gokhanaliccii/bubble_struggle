@@ -2,30 +2,67 @@ package player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import enums.BallType;
 import enums.Way;
 
-public class IBall {
+public class IBall implements IPosition {
 
+	BallType type;
 	Texture texture;
 	Vector2 pos;
 	Vector2 direction;
 	Way goingWay = Way.SOUTH_EAST;
+	int width, height;
 
 	public IBall(Texture tex, Vector2 pos, Vector2 dir) {
+
+		this(tex, pos, dir, BallType.BIG);
+	}
+
+	public IBall(Texture tex, Vector2 pos, Vector2 dir, BallType type) {
 
 		this.texture = tex;
 		this.pos = pos;
 		this.direction = dir;
+		this.type = type;
+
+		init();
 	}
-	
-	public int getWidth(){
-		return texture.getWidth();
+
+	private void init() {
+
+		switch (type) {
+
+		case BIG:
+
+			this.width = texture.getWidth();
+			this.height = texture.getHeight();
+			break;
+
+		case SMALL:
+
+			this.width = texture.getWidth() / 2;
+			this.height = texture.getHeight() / 2;
+			break;
+		default:
+			break;
+		}
 	}
-	
-	public int getHeight(){
-		return texture.getHeight();
+
+	public BallType getType() {
+		return type;
+	}
+
+	public void setType(BallType type) {
+		this.type = type;
+		init();
+	}
+
+	public void setGoingWay(Way goingWay) {
+		this.goingWay = goingWay;
 	}
 
 	public void setPosition(int x, int y) {
@@ -38,11 +75,16 @@ public class IBall {
 	}
 
 	public Texture getTexture() {
+
 		return texture;
 	}
 
 	public Vector2 getPos() {
 		return pos;
+	}
+
+	public Way getGoingWay() {
+		return goingWay;
 	}
 
 	public void update() {
@@ -52,7 +94,6 @@ public class IBall {
 
 	public void render() {
 
-		
 	}
 
 	public void updatePosition() {
@@ -111,13 +152,29 @@ public class IBall {
 
 		}
 
-		x *= 5;
-		y *= 5;
+		x *= 50;
+		y *= 50;
 
 		setPosition(x, y);
 	}
-	
-	public void checkBounce(){
-	
+
+	/** Implemented methods **/
+
+	@Override
+	public int getWidth() {
+
+		return width;
+	}
+
+	@Override
+	public int getHeight() {
+
+		return height;
+	}
+
+	@Override
+	public Vector2 getPosition() {
+
+		return pos;
 	}
 }

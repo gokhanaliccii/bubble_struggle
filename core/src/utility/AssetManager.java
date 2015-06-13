@@ -5,18 +5,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 
 public class AssetManager {
 
 	private static AssetManager assetManager;
 
 	private ConcurrentHashMap<String, Texture> textureMap;
-	private ConcurrentHashMap<String, Animation> animationMap;
 
 	public AssetManager() {
 
 		textureMap = new ConcurrentHashMap<String, Texture>();
-		animationMap = new ConcurrentHashMap<String, Animation>();
 	}
 
 	public static AssetManager getInstance() {
@@ -69,32 +70,4 @@ public class AssetManager {
 		return true;
 	}
 
-	public boolean cacheAnimation(String name, Animation animation) {
-
-		if (name == null || animation == null)
-			return false;
-
-		animationMap.put(name, animation);
-
-		return true;
-	}
-
-	public boolean isAnimationExistAtCache(String textureName) {
-
-		if (animationMap == null)
-			return false;
-
-		return animationMap.containsKey(textureName);
-	}
-
-	public Animation getAnimation(String animationPath) {
-
-		if (animationPath == null)
-			return null;
-
-		if (isAnimationExistAtCache(animationPath))
-			return animationMap.get(animationPath);
-
-		return null;
-	}
 }
