@@ -4,20 +4,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class AssetManager {
 
 	private static AssetManager assetManager;
 
 	private ConcurrentHashMap<String, Texture> textureMap;
+	private ConcurrentHashMap<String, BitmapFont> fontMap;
 
 	public AssetManager() {
 
 		textureMap = new ConcurrentHashMap<String, Texture>();
+		fontMap = new ConcurrentHashMap<String, BitmapFont>();
 	}
 
 	public static AssetManager getInstance() {
@@ -70,4 +69,52 @@ public class AssetManager {
 		return true;
 	}
 
+	/** fonts functions **/
+	public BitmapFont getFont(String fontPath, String fontImage) {
+
+		if (fontPath == null)
+			return null;
+
+		if (isFontExistAtCache(fontPath))
+			return fontMap.get(fontPath);
+
+		BitmapFont font = loadFont(fontPath, fontImage);
+		if (font == null)
+			return null;
+
+		cacheFont(fontPath, font);
+
+		return font;
+	}
+
+	public BitmapFont loadFont(String fontPath, String fontImagePath) {
+
+		if (fontPath == null)
+			return null;
+
+		return new BitmapFont(Gdx.files.internal(fontPath),
+				Gdx.files.internal(fontImagePath), false);
+	}
+
+	public boolean isFontExistAtCache(String textureName) {
+
+		if (fontMap == null)
+			return false;
+
+		return fontMap.containsKey(textureName);
+	}
+
+	public boolean cacheFont(String name, BitmapFont font) {
+
+		if (name == null || font == null)
+			return false;
+
+		fontMap.put(name, font);
+		return true;
+	}
+
+	public BitmapFont getDefaulFont() {
+		return getFont(ImagePath.FONT_PATH, ImagePath.FONT_IMAGE);
+	}
+	/** font functions **/
 }

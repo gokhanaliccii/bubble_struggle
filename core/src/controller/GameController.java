@@ -1,6 +1,8 @@
 package controller;
 
-import player.IBall;
+import listener.GameNotifier;
+import player.Commander;
+import player.Ball;
 import player.IPosition;
 import player.Weapon;
 
@@ -17,18 +19,29 @@ public class GameController {
 	private int screenWidth;
 	private int screenHeight;
 
-	private Array<IBall> activeBalls;
+	private Array<Ball> activeBalls;
 	private Weapon activeWeapon;
+	private Commander commander;
+
+	private GameNotifier notifier;
 
 	public GameController(int width, int height) {
 
 		this.screenWidth = width;
 		this.screenHeight = height;
 
-		activeBalls = new Array<IBall>();
+		activeBalls = new Array<Ball>();
 	}
 
-	public void newBall(IBall ball) {
+	public void setCommander(Commander commander) {
+		this.commander = commander;
+	}
+
+	public Commander getCommander() {
+		return commander;
+	}
+
+	public void newBall(Ball ball) {
 
 		this.activeBalls.add(ball);
 	}
@@ -38,10 +51,14 @@ public class GameController {
 		this.activeWeapon = activeWeapon;
 	}
 
+	public void setNotifier(GameNotifier notifier) {
+		this.notifier = notifier;
+	}
+
 	public void update() {
 
 		/** update balls position **/
-		for (IBall iBall : activeBalls) {
+		for (Ball iBall : activeBalls) {
 
 			iBall.updatePosition();
 			updateGoingWay(iBall);
@@ -62,38 +79,87 @@ public class GameController {
 		}
 
 		/** update player position **/
+		if (commander != null)
+			commander.update(findHitWall(commander));
 
 		/** check ball and weapon collision **/
-		for (IBall iBall : activeBalls) {
+		for (Ball iBall : activeBalls) {
 
 			if (checkCollision(iBall, activeWeapon)) {
 
+				/** notify new score **/
+				notifyNewScore(iBall.getType());
+
 				if (iBall.getType().equals(BallType.BIG)) {
 
-					iBall.setType(BallType.SMALL);
+					Ball leftBall = new Ball(iBall);
+					Ball rightBall = new Ball(iBall);
+
+					/** split balls **/
+					leftBall.setPosition(-10, 0);
+					rightBall.setPosition(10, 0);
+
+					leftBall.setGoingWay(Way.SOUTH_WEST);
+					rightBall.setGoingWay(Way.SOUTH_EAST);
+
+					leftBall.setType(BallType.SMALL);
+					rightBall.setType(BallType.SMALL);
+
+					leftBall.setMaxHeight(200);
+					rightBall.setMaxHeight(200);
+
+					newBall(rightBall);
+					newBall(leftBall);
+
+					activeBalls.removeValue(iBall, true);
+
 					activeWeapon = null;
 					break;
 				} else {
 
-					Gdx.app.log("Collision", "col");
+					Gdx.app.log("Collision", "ball and bullet");
 					activeBalls.removeValue(iBall, true);
 					activeWeapon = null;
+
+					if (activeBalls.size == 0)
+						notifyLevelIsCompleted();
+
 					break;
 				}
 			}
 		}
 
 		/** check ball and player collision **/
+		for (Ball iBall : activeBalls) {
+
+			if (checkCollision(iBall, commander)) {
+
+				Gdx.app.log("Collision", "ball and player");
+
+				setCommander(null);
+
+				/** notify player player killed **/
+				notifyPlayerKilled();
+
+			}
+		}
 
 	}
 
-	public void updateGoingWay(IBall iball) {
+	public void updateGoingWay(Ball iball) {
 
 		Way goingWay = iball.getGoingWay();
 
 		Wall hitWall = findHitWall(iball);
-		if (hitWall == null)
-			return;
+
+		boolean isExceedMaxHeight = isExceedMaxHight(iball);
+		if (hitWall == null) {
+
+			if (isExceedMaxHeight)
+				hitWall = Wall.TOP;
+			else
+				return;
+		}
 
 		switch (hitWall) {
 
@@ -134,7 +200,7 @@ public class GameController {
 		return screenHeight;
 	}
 
-	public Array<IBall> getActiveBalls() {
+	public Array<Ball> getActiveBalls() {
 
 		return activeBalls;
 	}
@@ -234,6 +300,17 @@ public class GameController {
 		return newWay;
 	}
 
+	private boolean isExceedMaxHight(Ball ball) {
+
+		Vector2 position = ball.getPos();
+		int currentY = (int) position.y + ball.getHeight();
+
+		if (currentY > ball.getMaxHeight())
+			return true;
+
+		return false;
+	}
+
 	private Wall findHitWall(IPosition iposition) {
 
 		int maxX = getScreenWidth();
@@ -279,5 +356,44 @@ public class GameController {
 				&& pos1.x + iposition1.getWidth() > pos2.x
 				&& pos1.y < pos2.y + iposition2.getHeight()
 				&& pos1.y + iposition1.getHeight() > pos2.y;
+	}
+
+	/** notify operation **/
+
+	private void notifyNewScore(BallType type) {
+
+		if (notifier == null)
+			return;
+
+		notifier.onGetNewScore(type);
+	}
+
+	private void notifyPlayerKilled() {
+
+		if (notifier == null)
+			return;
+
+		notifier.onCommanderKilled(commander);
+	}
+
+	private void notifyLevelIsCompleted() {
+
+		if (notifier == null)
+			return;
+
+		notifier.onLevelComplete();
+	}
+
+	public void cleanPlayer() {
+
+		commander = null;
+		activeWeapon = null;
+		activeBalls.clear();
+	}
+
+	public void resize(int screenWidth, int screenHeight) {
+
+		this.screenWidth = screenWidth;
+		this.screenHeight = screenHeight;
 	}
 }

@@ -2,13 +2,12 @@ package player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import enums.BallType;
 import enums.Way;
 
-public class IBall implements IPosition {
+public class Ball implements IPosition {
 
 	BallType type;
 	Texture texture;
@@ -16,18 +15,32 @@ public class IBall implements IPosition {
 	Vector2 direction;
 	Way goingWay = Way.SOUTH_EAST;
 	int width, height;
+	int maxHeight;
 
-	public IBall(Texture tex, Vector2 pos, Vector2 dir) {
+	public Ball(Texture tex, Vector2 pos, Vector2 dir) {
 
 		this(tex, pos, dir, BallType.BIG);
 	}
 
-	public IBall(Texture tex, Vector2 pos, Vector2 dir, BallType type) {
+	public Ball(Ball ball) {
+
+		this.type = ball.type;
+		this.texture = ball.texture;
+		this.pos = new Vector2(ball.pos);
+		this.direction = new Vector2(ball.direction);
+		this.goingWay = ball.goingWay;
+		this.width = ball.width;
+		this.height = ball.height;
+		this.maxHeight = ball.maxHeight;
+	}
+
+	public Ball(Texture tex, Vector2 pos, Vector2 dir, BallType type) {
 
 		this.texture = tex;
 		this.pos = pos;
 		this.direction = dir;
 		this.type = type;
+		this.maxHeight = (int) pos.y;
 
 		init();
 	}
@@ -63,6 +76,11 @@ public class IBall implements IPosition {
 
 	public void setGoingWay(Way goingWay) {
 		this.goingWay = goingWay;
+	}
+
+	public void setInitialPosition(Vector2 position) {
+
+		pos = new Vector2(position);
 	}
 
 	public void setPosition(int x, int y) {
@@ -156,6 +174,16 @@ public class IBall implements IPosition {
 		y *= 50;
 
 		setPosition(x, y);
+	}
+
+	public int getMaxHeight() {
+		
+		return maxHeight;
+	}
+
+	public void setMaxHeight(int maxHeight) {
+
+		this.maxHeight = maxHeight;
 	}
 
 	/** Implemented methods **/

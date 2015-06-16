@@ -1,10 +1,14 @@
 package utility;
 
+import model.Score;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net.HttpMethods;
 import com.badlogic.gdx.Net.HttpRequest;
 import com.badlogic.gdx.Net.HttpResponse;
 import com.badlogic.gdx.Net.HttpResponseListener;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class OnlineScore implements HttpResponseListener {
 
@@ -16,14 +20,22 @@ public class OnlineScore implements HttpResponseListener {
 		app_key = "JqeNAilWqJuQtN8LeJO8OJ6qv6qnDiTzE1pcsuJt";
 	}
 
-	public void add_net_score() {
+	public void addNewScore(Score score) {
 
+		if(score== null)
+			return ;
+
+		Json json=new Json(OutputType.json);
+		String scoreJson = json.toJson(score, score.getClass());
+		
+		
+		
 		HttpRequest httpPost = new HttpRequest(HttpMethods.POST);
 		httpPost.setUrl("https://api.parse.com/1/classes/Score/");
 		httpPost.setHeader("Content-Type", "application/json");
 		httpPost.setHeader("X-Parse-Application-Id", app_id);
 		httpPost.setHeader("X-Parse-REST-API-Key", app_key);
-		httpPost.setContent("{\"Score\": 1337, \"Name\": \"CarelessLabs Java\"}");
+		httpPost.setContent(scoreJson);
 
 		Gdx.net.sendHttpRequest(httpPost, OnlineScore.this);
 	}
@@ -40,7 +52,10 @@ public class OnlineScore implements HttpResponseListener {
 
 	@Override
 	public void handleHttpResponse(HttpResponse httpResponse) {
+		
 		final int statusCode = httpResponse.getStatus().getStatusCode();
+		
+		
 		System.out.println(statusCode + " " + httpResponse.getResultAsString());
 	}
 
@@ -53,4 +68,6 @@ public class OnlineScore implements HttpResponseListener {
 	public void cancelled() {
 
 	}
+	
+	
 }

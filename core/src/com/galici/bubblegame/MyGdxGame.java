@@ -6,18 +6,12 @@ import screen.ScreenManager;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class MyGdxGame implements ApplicationListener {
 
-	SpriteBatch spriteBatch;
-	ScreenManager screenManager;
-
-	OrthographicCamera camera;
+	private SpriteBatch spriteBatch;
+	private ScreenManager screenManager;
 
 	@Override
 	public void create() {
@@ -27,15 +21,15 @@ public class MyGdxGame implements ApplicationListener {
 		screenManager.getCurrentScreen().create();
 
 		spriteBatch = new SpriteBatch();
-		camera = new OrthographicCamera();
+
 	}
 
 	@Override
 	public void render() {
 
+		Gdx.graphics.getGL20().glClearColor(1, 0.84f, 0, 0.3f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		
+
 		screenManager.getCurrentScreen().update();
 		screenManager.getCurrentScreen().render(spriteBatch);
 
@@ -43,6 +37,8 @@ public class MyGdxGame implements ApplicationListener {
 
 	@Override
 	public void resize(int width, int height) {
+
+		screenManager.resize(width, height);
 		screenManager.getCurrentScreen().resize(width, height);
 	}
 
