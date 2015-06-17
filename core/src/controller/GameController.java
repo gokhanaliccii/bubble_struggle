@@ -101,8 +101,8 @@ public class GameController {
 					leftBall.setPosition(-10, 0);
 					rightBall.setPosition(10, 0);
 
-					leftBall.setGoingWay(Way.SOUTH_WEST);
-					rightBall.setGoingWay(Way.SOUTH_EAST);
+					leftBall.setGoingWay(Way.NORTH_WEST);
+					rightBall.setGoingWay(Way.NORTH_EAST);
 
 					leftBall.setType(BallType.SMALL);
 					rightBall.setType(BallType.SMALL);

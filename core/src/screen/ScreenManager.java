@@ -70,7 +70,27 @@ public class ScreenManager {
 
 	private void calcalutaAspectRatio() {
 
-		this.aspectRatioHorizontal = screenWidth / DEFAULT_SCREEN_WIDTH;
-		this.aspectRatioVertical = screenHeight / DEFAULT_SCREEN_HEIGHT;
+		this.aspectRatioHorizontal = (float) screenWidth / DEFAULT_SCREEN_WIDTH;
+		this.aspectRatioVertical = (float) screenHeight / DEFAULT_SCREEN_HEIGHT;
+	}
+
+	public int getCenterX() {
+
+		return screenWidth / 2;
+	}
+
+	public int getCenterY() {
+
+		return screenHeight / 2;
+	}
+
+	public int scaledX(int x) {
+
+		return (int) (x * aspectRatioHorizontal);
+	}
+
+	public int scaledY(int y) {
+
+		return (int) (y * aspectRatioHorizontal);
 	}
 }

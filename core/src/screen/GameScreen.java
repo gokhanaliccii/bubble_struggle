@@ -57,7 +57,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	LevelGenerator levelGenerator;
 
 	/** Sounds **/
-	Sound bulletSound, boomBallSound, playerHitSount;
+	Sound bulletSound, boomBallSound, playerHitSount, startSound, timeoutSound;
 
 	@Override
 	public void create() {
@@ -83,6 +83,12 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		boomBallSound = Gdx.audio.newSound(Gdx.files
 				.internal(ResourcePath.BALL_BOOM_SOUND));
+
+		startSound = Gdx.audio.newSound(Gdx.files
+				.internal(ResourcePath.START_SOUND));
+
+		timeoutSound = Gdx.audio.newSound(Gdx.files
+				.internal(ResourcePath.TIMEOUT_SOUND));
 
 		newScore = new Score();
 		levelGenerator = new LevelGenerator();
@@ -175,21 +181,29 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		/** show score **/
 		String scoreText = "" + newScore.getScore();
-		font.draw(spriteBatch, scoreText, 390, 476);
+		font.draw(spriteBatch, scoreText, screenManager.getCenterX() - padding,
+				screenManager.getScreenHeight() - padding);
+
+		int textX = screenManager.scaledX(240);
+		int textY = screenManager.scaledY(280);
 
 		switch (gameState) {
 
 		case WAITING_TO_START:
 
-			font.draw(spriteBatch, "READY ?", 240, 280);
+			font.draw(spriteBatch, "READY ?", textX, textY);
 
-			if (Gdx.input.isTouched())
+			if (Gdx.input.isTouched()) {
+
 				gameState = GameState.RUNNING;
+				startSound.play(1);
+			}
 
 			break;
 
 		case GAME_OVER:
-			font.draw(spriteBatch, "RETRY ?", 240, 280);
+
+			font.draw(spriteBatch, "RETRY ?", textX, textY);
 
 			if (Gdx.input.isTouched()) {
 
@@ -201,7 +215,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 			if (gameIsFinished(currentLevel)) {
 
-				font.draw(spriteBatch, "CONGR.. ", 240, 280);
+				font.draw(spriteBatch, "CONGR.. ", textX, textY);
 				if (Gdx.input.isTouched()) {
 
 					currentLevel = Level.LEVEL_1;
@@ -210,7 +224,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 				}
 			} else {
 
-				font.draw(spriteBatch, "NEXT LEVEL?", 240, 280);
+				font.draw(spriteBatch, "NEXT LEVEL?", textX, textY);
 				if (Gdx.input.isTouched()) {
 
 					gameState = GameState.RUNNING;
@@ -250,11 +264,6 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		viewPort.update(width, height);
 		gameController.resize(width, height);
-	}
-
-	@Override
-	public void dispose() {
-
 	}
 
 	@Override
@@ -353,6 +362,8 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	@Override
 	public void onLevelComplete() {
 
+		timeoutSound.play();
+
 		gameState = GameState.END_OF_LEVEL;
 		reloadPlayers();
 		currentLevel = goNextLevel();
@@ -388,5 +399,17 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		if (boomBallSound != null)
 			boomBallSound.play();
+	}
+
+	@Override
+	public void dispose() {
+
+		bulletSound.dispose();
+		boomBallSound.dispose();
+		playerHitSount.dispose();
+		startSound.dispose();
+		timeoutSound.dispose();
+
+		retryImage.dispose();
 	}
 }
