@@ -16,6 +16,7 @@ import enums.Wall;
 
 public class Commander implements IPosition {
 
+	private int velocity = 110;
 	Vector2 position;
 	Animation currentAnimation;
 	AnimationType currentType;
@@ -48,12 +49,18 @@ public class Commander implements IPosition {
 
 	public void moveRight() {
 
-		position.x = position.x + 1;
+		Vector2 direction = new Vector2(velocity, position.y);
+		direction.scl(Gdx.graphics.getDeltaTime());
+
+		position.add(direction);
 	}
 
 	public void moveLeft() {
 
-		position.x = position.x - 1;
+		Vector2 direction = new Vector2(-velocity, position.y);
+		direction.scl(Gdx.graphics.getDeltaTime());
+
+		position.add(direction);
 	}
 
 	public Animation getCurrentAnimation() {
@@ -85,14 +92,14 @@ public class Commander implements IPosition {
 		float newXPos = 0;
 
 		Orientation nativeOrientation = Gdx.input.getNativeOrientation();
-		
+
 		switch (nativeOrientation) {
 		case Landscape:
 			newXPos = Gdx.input.getAccelerometerX();
 			break;
 
 		default:
-			
+
 			newXPos = Gdx.input.getAccelerometerY();
 			break;
 		}

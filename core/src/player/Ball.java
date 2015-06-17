@@ -9,6 +9,8 @@ import enums.Way;
 
 public class Ball implements IPosition {
 
+	private static final int velocityX = 100;
+	private static final int velocityY = 120;
 	BallType type;
 	Texture texture;
 	Vector2 pos;
@@ -170,14 +172,14 @@ public class Ball implements IPosition {
 
 		}
 
-		x *= 50;
-		y *= 50;
+		x *= velocityX;
+		y *= velocityY;
 
 		setPosition(x, y);
 	}
 
 	public int getMaxHeight() {
-		
+
 		return maxHeight;
 	}
 

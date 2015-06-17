@@ -13,7 +13,7 @@ public class Weapon implements IPosition {
 	Animation currentAnimation;
 	Vector2 position;
 	boolean draw = false;
-	int velocity = 100;
+	int velocity = 300;
 
 	int height;
 	int width;

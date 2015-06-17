@@ -191,7 +191,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 					currentLevel = Level.LEVEL_1;
 					gameState = GameState.RUNNING;
-					restart();
+					reloadPlayers();
 				}
 			} else {
 
