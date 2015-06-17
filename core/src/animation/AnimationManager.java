@@ -2,7 +2,7 @@ package animation;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import utility.ImagePath;
+import utility.ResourcePath;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -55,22 +55,22 @@ public class AnimationManager {
 
 		case FORWARD_WALKING:
 
-			animationPath = ImagePath.SPRITE_WALKING_FORWARD;
+			animationPath = ResourcePath.SPRITE_WALKING_FORWARD;
 			break;
 
 		case LEFT_WALKING:
 
-			animationPath = ImagePath.SPRITE_WALKING_LEFT;
+			animationPath = ResourcePath.SPRITE_WALKING_LEFT;
 			break;
 
 		case RIGHT_WALKING:
 
-			animationPath = ImagePath.SPRITE_WALKING_RIGHT;
+			animationPath = ResourcePath.SPRITE_WALKING_RIGHT;
 			break;
 
 		case WEAPON:
 			
-			animationPath = ImagePath.WEAPON;
+			animationPath = ResourcePath.WEAPON;
 			break;
 		default:
 			return null;

@@ -87,7 +87,9 @@ public class GameController {
 
 			if (checkCollision(iBall, activeWeapon)) {
 
-				/** notify new score **/
+				/** notify ball and new score **/
+
+				notifyBallBoom();
 				notifyNewScore(iBall.getType());
 
 				if (iBall.getType().equals(BallType.BIG)) {
@@ -359,6 +361,14 @@ public class GameController {
 	}
 
 	/** notify operation **/
+
+	private void notifyBallBoom() {
+
+		if (notifier == null)
+			return;
+
+		notifier.onBallBoom();
+	}
 
 	private void notifyNewScore(BallType type) {
 

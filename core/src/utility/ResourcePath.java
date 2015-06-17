@@ -1,6 +1,6 @@
 package utility;
 
-public class ImagePath {
+public class ResourcePath {
 	
 	/** Animations paths **/ 
 	public static final String SPRITE_WALKING_RIGHT="atlases/right-walking.atlas";
@@ -16,4 +16,10 @@ public class ImagePath {
 	/** Font Paths **/ 
 	public static final String FONT_PATH="fonts/font.fnt";
 	public static final String FONT_IMAGE="fonts/font.png";
+	
+	/** Sounds Path **/ 
+	public static final String BULLET_SOUND="sounds/bullet_sound.wav";
+	public static final String BALL_BOOM_SOUND="sounds/ball_boom.mp3";
+	public static final String COMMANDER_KILL_SOUND="sounds/player_hit.mp3";
+	
 }

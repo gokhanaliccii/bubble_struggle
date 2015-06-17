@@ -7,12 +7,13 @@ import player.Ball;
 import player.Commander;
 import player.Weapon;
 import utility.AssetManager;
-import utility.ImagePath;
 import utility.LevelGenerator;
+import utility.ResourcePath;
 import animation.AnimationManager;
 import animation.AnimationType;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -55,6 +56,9 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	Level currentLevel = Level.LEVEL_1;
 	LevelGenerator levelGenerator;
 
+	/** Sounds **/
+	Sound bulletSound, boomBallSound, playerHitSount;
+
 	@Override
 	public void create() {
 
@@ -67,7 +71,18 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		assetManager = AssetManager.getInstance();
 
 		font = assetManager.getDefaulFont();
-		retryImage = assetManager.getTexture(ImagePath.RETRY_COUNT_IMAGE);
+		retryImage = assetManager.getTexture(ResourcePath.RETRY_COUNT_IMAGE);
+
+		/** load sounds to memory **/
+
+		bulletSound = Gdx.audio.newSound(Gdx.files
+				.internal(ResourcePath.BULLET_SOUND));
+
+		playerHitSount = Gdx.audio.newSound(Gdx.files
+				.internal(ResourcePath.COMMANDER_KILL_SOUND));
+
+		boomBallSound = Gdx.audio.newSound(Gdx.files
+				.internal(ResourcePath.BALL_BOOM_SOUND));
 
 		newScore = new Score();
 		levelGenerator = new LevelGenerator();
@@ -267,9 +282,15 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	@Override
 	public void shootBullet(Weapon weapon) {
 
+		if (!gameState.equals(GameState.RUNNING))
+			return;
+
 		Weapon bullet = gameController.getActiveWeapon();
 		if (bullet != null)
 			return;
+
+		/** Play sounds **/
+		bulletSound.play();
 
 		gameController.setActiveWeapon(weapon);
 	}
@@ -278,6 +299,9 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	public void onCommanderKilled(Commander commander) {
 
 		retryCount--;
+
+		/** Play Sound **/
+		playerHitSount.play();
 
 		if (retryCount == 0)
 			gameState = GameState.GAME_OVER;
@@ -354,5 +378,15 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		}
 
 		return Level.END_OF_GAME;
+	}
+
+	@Override
+	public void onBallBoom() {
+
+		if (bulletSound != null)
+			bulletSound.stop();
+
+		if (boomBallSound != null)
+			boomBallSound.play();
 	}
 }

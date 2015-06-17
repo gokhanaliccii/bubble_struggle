@@ -36,7 +36,7 @@ public class LevelGenerator {
 		Array<Ball> level1Balls = new Array<Ball>();
 
 		Texture redTexture = AssetManager.getInstance().getTexture(
-				ImagePath.RED_BALL);
+				ResourcePath.RED_BALL);
 
 		ScreenManager screenManager = ScreenManager.getInstance();
 		int height = screenManager.getScreenHeight();
@@ -56,7 +56,7 @@ public class LevelGenerator {
 		Array<Ball> level2Balls = new Array<Ball>();
 
 		Texture redTexture = AssetManager.getInstance().getTexture(
-				ImagePath.RED_BALL);
+				ResourcePath.RED_BALL);
 
 		ScreenManager screenManager = ScreenManager.getInstance();
 		int height = screenManager.getScreenHeight();

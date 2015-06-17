@@ -114,7 +114,7 @@ public class AssetManager {
 	}
 
 	public BitmapFont getDefaulFont() {
-		return getFont(ImagePath.FONT_PATH, ImagePath.FONT_IMAGE);
+		return getFont(ResourcePath.FONT_PATH, ResourcePath.FONT_IMAGE);
 	}
 	/** font functions **/
 }
