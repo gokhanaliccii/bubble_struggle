@@ -2,5 +2,5 @@ package enums;
 
 public enum BallType {
 
-	SMALL,BIG,
+	SMALL, MEDIUM, BIG,
 }

@@ -3,6 +3,7 @@ package utility;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
@@ -116,5 +117,17 @@ public class AssetManager {
 	public BitmapFont getDefaulFont() {
 		return getFont(ResourcePath.FONT_PATH, ResourcePath.FONT_IMAGE);
 	}
+
 	/** font functions **/
+
+	public Sound getSound(String path) {
+
+		return Gdx.audio.newSound(Gdx.files.internal(path));
+	}
+	
+	public void freeToMap(){
+		
+		textureMap.clear();
+		fontMap.clear();
+	}
 }

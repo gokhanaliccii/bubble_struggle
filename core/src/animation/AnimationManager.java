@@ -69,7 +69,7 @@ public class AnimationManager {
 			break;
 
 		case WEAPON:
-			
+
 			animationPath = ResourcePath.WEAPON;
 			break;
 		default:
@@ -122,4 +122,8 @@ public class AnimationManager {
 		return animation;
 	}
 
+	public void freeToMap() {
+
+		animationMap.clear();
+	}
 }

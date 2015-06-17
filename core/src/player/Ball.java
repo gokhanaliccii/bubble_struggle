@@ -51,17 +51,25 @@ public class Ball implements IPosition {
 
 		switch (type) {
 
+		case SMALL:
+
+			this.width = texture.getWidth() / 2;
+			this.height = texture.getHeight() / 2;
+			break;
+
+		case MEDIUM:
+
+			this.width = 2 * texture.getWidth() / 3;
+			this.height = 2 * texture.getHeight() / 3;
+
+			break;
+
 		case BIG:
 
 			this.width = texture.getWidth();
 			this.height = texture.getHeight();
 			break;
 
-		case SMALL:
-
-			this.width = texture.getWidth() / 2;
-			this.height = texture.getHeight() / 2;
-			break;
 		default:
 			break;
 		}

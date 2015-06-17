@@ -9,8 +9,9 @@ public class ResourcePath {
 	public static final String WEAPON = "atlases/weapon.atlas";
 
 	/** Image Paths **/
-	public static final String RED_BALL = "red-ball.png";
-	public static final String GREEN_BALL = "green-ball.png";
+	public static final String GREEN_BALL = "green_ball.png";
+	public static final String PINK_BALL = "pink-ball.png";
+	public static final String BLUE_BALL = "blue-ball.png";
 	public static final String RETRY_COUNT_IMAGE = "retry-count.png";
 	public static final String BACKGROUND_IMAGE = "background.jpg";
 

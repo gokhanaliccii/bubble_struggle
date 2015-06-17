@@ -7,7 +7,8 @@ import player.Ball;
 import player.Commander;
 import player.Weapon;
 import utility.AssetManager;
-import utility.LevelGenerator;
+import utility.BallUtils;
+import utility.LevelUtils;
 import utility.ResourcePath;
 import animation.AnimationManager;
 import animation.AnimationType;
@@ -21,7 +22,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -35,29 +35,29 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 	private Viewport viewPort;
 	private OrthographicCamera camera;
+
+	private BitmapFont font;
+	private Texture retryImage;
+
+	/** Frequently changes variables **/
+	private Score newScore;
+	private int retryCount = 3;
+	private float passedTime = 0f;
+	private Level currentLevel = Level.LEVEL_1;
+	private GameState gameState = GameState.WAITING_TO_START;
+
+	/** Utility **/
+	private BallUtils ballUtil;
+	private LevelUtils levelUtil;
+	private AssetManager assetManager;
 	private ScreenManager screenManager;
-
-	float elapsedTime = 0f;
-
-	AnimationManager animationManager;
-	AssetManager assetManager;
-
-	GameController gameController;
-
-	ProgressBar timeBar;
-
-	Score newScore;
-	int retryCount = 3;
-
-	Texture retryImage;
-	BitmapFont font;
-	GameState gameState = GameState.WAITING_TO_START;
-
-	Level currentLevel = Level.LEVEL_1;
-	LevelGenerator levelGenerator;
+	private AnimationManager animationManager;
 
 	/** Sounds **/
 	Sound bulletSound, boomBallSound, playerHitSount, startSound, timeoutSound;
+
+	/** Objects controller **/
+	private GameController gameController;
 
 	@Override
 	public void create() {
@@ -74,29 +74,26 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		retryImage = assetManager.getTexture(ResourcePath.RETRY_COUNT_IMAGE);
 
 		/** load sounds to memory **/
-
-		bulletSound = Gdx.audio.newSound(Gdx.files
-				.internal(ResourcePath.BULLET_SOUND));
-
-		playerHitSount = Gdx.audio.newSound(Gdx.files
-				.internal(ResourcePath.COMMANDER_KILL_SOUND));
-
-		boomBallSound = Gdx.audio.newSound(Gdx.files
-				.internal(ResourcePath.BALL_BOOM_SOUND));
-
-		startSound = Gdx.audio.newSound(Gdx.files
-				.internal(ResourcePath.START_SOUND));
-
-		timeoutSound = Gdx.audio.newSound(Gdx.files
-				.internal(ResourcePath.TIMEOUT_SOUND));
+		loadSounds();
 
 		newScore = new Score();
-		levelGenerator = new LevelGenerator();
+		levelUtil = new LevelUtils();
+		ballUtil = new BallUtils();
 
 		gameController = new GameController(getWidth(), getHeight());
 		gameController.setNotifier(this);
 
 		reloadPlayers();
+	}
+
+	private void loadSounds() {
+
+		bulletSound = assetManager.getSound(ResourcePath.BULLET_SOUND);
+		playerHitSount = assetManager
+				.getSound(ResourcePath.COMMANDER_KILL_SOUND);
+		boomBallSound = assetManager.getSound(ResourcePath.BALL_BOOM_SOUND);
+		startSound = assetManager.getSound(ResourcePath.START_SOUND);
+		timeoutSound = assetManager.getSound(ResourcePath.TIMEOUT_SOUND);
 	}
 
 	private void reloadPlayers() {
@@ -111,12 +108,8 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		gameController.cleanPlayer();
 
-		Array<Ball> levelBalls = levelGenerator.getBalls(currentLevel);
-		for (Ball ball : levelBalls) {
-
-			gameController.newBall(ball);
-		}
-
+		Array<Ball> levelBalls = levelUtil.getBalls(currentLevel);
+		gameController.addNewBall(levelBalls);
 		gameController.setCommander(commander);
 	}
 
@@ -128,7 +121,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		spriteBatch.setProjectionMatrix(camera.combined);
 
 		spriteBatch.begin();
-		elapsedTime += Gdx.graphics.getDeltaTime();
+		passedTime += Gdx.graphics.getDeltaTime();
 
 		/** drawing bullet **/
 		Weapon activeWeapon = gameController.getActiveWeapon();
@@ -137,9 +130,8 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 			Vector2 weaponPos = activeWeapon.getPosition();
 
 			spriteBatch.draw(
-					activeWeapon.getCurrentAnimation().getKeyFrame(elapsedTime,
+					activeWeapon.getCurrentAnimation().getKeyFrame(passedTime,
 							true), weaponPos.x, weaponPos.y);
-
 		}
 
 		/** drawing balls **/
@@ -162,7 +154,7 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		if (player != null) {
 
 			TextureRegion commanderAnim = player.getCurrentAnimation()
-					.getKeyFrame(elapsedTime, true);
+					.getKeyFrame(passedTime, true);
 			Vector2 commanderPosition = player.getPosition();
 
 			spriteBatch.draw(commanderAnim, commanderPosition.x,
@@ -172,26 +164,32 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		/** draw try count **/
 
 		int padding = 20;
+		float retryPosY = getHeight() - retryImage.getHeight() - padding;
 		for (int count = 0; count < retryCount; count++) {
 
-			spriteBatch.draw(retryImage,
-					padding + (count * retryImage.getWidth()), getHeight()
-							- retryImage.getHeight() - padding);
+			float retryPosX = padding + (count * retryImage.getWidth());
+			spriteBatch.draw(retryImage, retryPosX, retryPosY);
 		}
+		drawGameTexts(spriteBatch);
+
+		spriteBatch.end();
+	}
+
+	private void drawGameTexts(SpriteBatch spriteBatch) {
+
+		int padding = 20;
 
 		/** show score **/
 		String scoreText = "" + newScore.getScore();
 		font.draw(spriteBatch, scoreText, screenManager.getCenterX() - padding,
 				screenManager.getScreenHeight() - padding);
 
-		int textX = screenManager.scaledX(240);
-		int textY = screenManager.scaledY(280);
-
 		switch (gameState) {
 
 		case WAITING_TO_START:
 
-			font.draw(spriteBatch, "READY ?", textX, textY);
+			font.draw(spriteBatch, "READY ?", screenManager.scaledX(300),
+					screenManager.scaledY(280));
 
 			if (Gdx.input.isTouched()) {
 
@@ -203,7 +201,8 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		case GAME_OVER:
 
-			font.draw(spriteBatch, "RETRY ?", textX, textY);
+			font.draw(spriteBatch, "RETRY ?", screenManager.scaledX(300),
+					screenManager.scaledY(280));
 
 			if (Gdx.input.isTouched()) {
 
@@ -211,20 +210,23 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 				restart();
 			}
 			break;
+
 		case END_OF_LEVEL:
 
-			if (gameIsFinished(currentLevel)) {
+			if (levelUtil.gameIsFinished(currentLevel)) {
 
-				font.draw(spriteBatch, "CONGR.. ", textX, textY);
+				font.draw(spriteBatch, "CONGR.. ", screenManager.scaledX(300),
+						screenManager.scaledY(280));
 				if (Gdx.input.isTouched()) {
 
 					currentLevel = Level.LEVEL_1;
 					gameState = GameState.RUNNING;
-					reloadPlayers();
+					restart();
 				}
 			} else {
 
-				font.draw(spriteBatch, "NEXT LEVEL?", textX, textY);
+				font.draw(spriteBatch, "NEXT LEVEL?",
+						screenManager.scaledX(240), screenManager.scaledY(280));
 				if (Gdx.input.isTouched()) {
 
 					gameState = GameState.RUNNING;
@@ -233,28 +235,17 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 			}
 
 			break;
-		case RUNNING:
-			break;
+
 		default:
 			break;
 		}
-
-		spriteBatch.end();
 	}
 
 	@Override
 	public void update() {
 
-		switch (gameState) {
-
-		case RUNNING:
-
+		if (gameState.equals(GameState.RUNNING))
 			gameController.update();
-			break;
-
-		default:
-			break;
-		}
 
 		camera.update();
 	}
@@ -264,16 +255,6 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		viewPort.update(width, height);
 		gameController.resize(width, height);
-	}
-
-	@Override
-	public void pause() {
-
-	}
-
-	@Override
-	public void resume() {
-
 	}
 
 	@Override
@@ -325,30 +306,11 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	@Override
 	public void onGetNewScore(BallType ballType) {
 
-		int willAddScore = 0;
+		int willAddScore = calculateNewScore(ballType);
 		int currentScore = newScore.getScore();
-
-		switch (ballType) {
-
-		case SMALL:
-
-			willAddScore = 5;
-			break;
-
-		case BIG:
-
-			willAddScore = 10;
-			break;
-
-		default:
-			break;
-		}
-
-		/** increment score **/
 
 		currentScore += willAddScore;
 		newScore.setScore(currentScore);
-
 	}
 
 	private void restart() {
@@ -364,31 +326,18 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 
 		timeoutSound.play();
 
-		gameState = GameState.END_OF_LEVEL;
 		reloadPlayers();
-		currentLevel = goNextLevel();
+		gameState = GameState.END_OF_LEVEL;
+		currentLevel = levelUtil.getNextLevel(currentLevel);
 	}
 
-	private boolean gameIsFinished(Level level) {
+	private int calculateNewScore(BallType type) {
 
-		if (level.equals(Level.END_OF_GAME))
-			return true;
+		float levelCoefficent = levelUtil.getLevelCoefficent(currentLevel);
+		float ballCoefficent = ballUtil.getBallTypeCoefficent(type);
 
-		return false;
-	}
-
-	private Level goNextLevel() {
-
-		switch (currentLevel) {
-
-		case LEVEL_1:
-			return Level.LEVEL_2;
-
-		default:
-			break;
-		}
-
-		return Level.END_OF_GAME;
+		int score = (int) (levelCoefficent * ballCoefficent * 5);
+		return score;
 	}
 
 	@Override
@@ -402,6 +351,16 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 	}
 
 	@Override
+	public void pause() {
+
+	}
+
+	@Override
+	public void resume() {
+
+	}
+
+	@Override
 	public void dispose() {
 
 		bulletSound.dispose();
@@ -411,5 +370,8 @@ public class GameScreen implements IScreen, BulletListener, GameNotifier {
 		timeoutSound.dispose();
 
 		retryImage.dispose();
+
+		animationManager.freeToMap();
+		assetManager.freeToMap();
 	}
 }

@@ -5,6 +5,7 @@ import player.Commander;
 import player.Ball;
 import player.IPosition;
 import player.Weapon;
+import utility.BallUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
@@ -41,9 +42,23 @@ public class GameController {
 		return commander;
 	}
 
-	public void newBall(Ball ball) {
+	public void addNewBall(Ball ball) {
 
 		this.activeBalls.add(ball);
+	}
+
+	public void addNewBall(Array<Ball> balls) {
+
+		if (balls == null)
+			return;
+
+		for (Ball ball : balls) {
+
+			if (ball == null)
+				continue;
+
+			addNewBall(ball);
+		}
 	}
 
 	public void setActiveWeapon(Weapon activeWeapon) {
@@ -87,47 +102,34 @@ public class GameController {
 
 			if (checkCollision(iBall, activeWeapon)) {
 
+				Gdx.app.log("Collision", "ball and bullet");
 				/** notify ball and new score **/
 
 				notifyBallBoom();
 				notifyNewScore(iBall.getType());
 
-				if (iBall.getType().equals(BallType.BIG)) {
+				BallUtils ballUtil = new BallUtils();
 
-					Ball leftBall = new Ball(iBall);
-					Ball rightBall = new Ball(iBall);
+				if (ballUtil.isSpawnableBall(iBall)) {
 
-					/** split balls **/
-					leftBall.setPosition(-10, 0);
-					rightBall.setPosition(10, 0);
+					Array<Ball> spawnedBalls = ballUtil.spawnBalls(iBall);
 
-					leftBall.setGoingWay(Way.NORTH_WEST);
-					rightBall.setGoingWay(Way.NORTH_EAST);
+					if (spawnedBalls != null)
+						addNewBall(spawnedBalls);
 
-					leftBall.setType(BallType.SMALL);
-					rightBall.setType(BallType.SMALL);
-
-					leftBall.setMaxHeight(200);
-					rightBall.setMaxHeight(200);
-
-					newBall(rightBall);
-					newBall(leftBall);
-
-					activeBalls.removeValue(iBall, true);
-
-					activeWeapon = null;
-					break;
 				} else {
 
-					Gdx.app.log("Collision", "ball and bullet");
-					activeBalls.removeValue(iBall, true);
-					activeWeapon = null;
-
-					if (activeBalls.size == 0)
+					if (activeBalls != null && activeBalls.size == 0)
 						notifyLevelIsCompleted();
-
-					break;
 				}
+
+				activeWeapon = null;
+				activeBalls.removeValue(iBall, true);
+
+				if (activeBalls.size == 0)
+					notifyLevelIsCompleted();
+
+				break;
 			}
 		}
 
@@ -195,10 +197,12 @@ public class GameController {
 	}
 
 	public int getScreenWidth() {
+
 		return screenWidth;
 	}
 
 	public int getScreenHeight() {
+
 		return screenHeight;
 	}
 
