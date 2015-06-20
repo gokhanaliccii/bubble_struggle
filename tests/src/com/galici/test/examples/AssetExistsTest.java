@@ -28,8 +28,45 @@ import com.galici.test.GdxTestRunner;
 public class AssetExistsTest {
 
 	@Test
-	public void badlogicLogoFileExists() {
-		assertTrue("", Gdx.files
-				.internal("../android/assets/background2.jpg").exists());
+	public void backgroundFileShouldReturnFailure() {
+		
+		assertTrue("Background file dont exist",isFileExist("../android/assets/background2.jpg"));
+	}
+
+	@Test
+	public void animationPathShouldReturnOK() {
+
+		String forwardWalkingAnim = "../android/assets/atlases/forward-walking.atlas";
+		String rightWalkingAnim = "../android/assets/atlases/right-walking.atlas";
+		String leftWalkingAnim = "../android/assets/atlases/left-walking.atlas";
+		String arrowAnim = "../android/assets/atlases/weapon.atlas";
+
+		/** walking animations **/
+		assertTrue("Commander forward animation is exist",
+				isFileExist(forwardWalkingAnim));
+		assertTrue("Commander right animation is exist",
+				isFileExist(rightWalkingAnim));
+		assertTrue("Commander left animation is exist",
+				isFileExist(leftWalkingAnim));
+
+		/** arrow animation **/
+		assertTrue("Weapon animation is exist", isFileExist(arrowAnim));
+	}
+
+	@Test
+	public void soundTestShouldFail(){
+		
+		String timeoutSound = "../android/sounds/timeout.png";
+		String startSound = "../android/sounds/start_sound.wav";
+		String bulletSound = "../android/sounds/bullet_sound.mp3";
+		
+		assertTrue("Timeout sound is exist",isFileExist(timeoutSound));
+		assertTrue("Start sound is exist",isFileExist(startSound));
+		assertTrue("Bullet sound is exist",	isFileExist(bulletSound));
+	}
+	
+	private boolean isFileExist(String path) {
+
+		return Gdx.files.internal(path).exists();
 	}
 }

@@ -26,6 +26,9 @@ public class GameController {
 
 	private GameNotifier notifier;
 
+	public GameController() {
+	}
+	
 	public GameController(int width, int height) {
 
 		this.screenWidth = width;

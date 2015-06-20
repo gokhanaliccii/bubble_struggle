@@ -28,7 +28,8 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
 
-public class GdxTestRunner extends BlockJUnit4ClassRunner implements ApplicationListener {
+public class GdxTestRunner extends BlockJUnit4ClassRunner implements
+		ApplicationListener {
 
 	private Map<FrameworkMethod, RunNotifier> invokeInRender = new HashMap<FrameworkMethod, RunNotifier>();
 
@@ -50,7 +51,8 @@ public class GdxTestRunner extends BlockJUnit4ClassRunner implements Application
 	@Override
 	public void render() {
 		synchronized (invokeInRender) {
-			for (Map.Entry<FrameworkMethod, RunNotifier> each : invokeInRender.entrySet()) {
+			for (Map.Entry<FrameworkMethod, RunNotifier> each : invokeInRender
+					.entrySet()) {
 				super.runChild(each.getKey(), each.getValue());
 			}
 			invokeInRender.clear();
@@ -72,10 +74,8 @@ public class GdxTestRunner extends BlockJUnit4ClassRunner implements Application
 	@Override
 	protected void runChild(FrameworkMethod method, RunNotifier notifier) {
 		synchronized (invokeInRender) {
-			// add for invoking in render phase, where gl context is available
 			invokeInRender.put(method, notifier);
 		}
-		// wait until that test was invoked
 		waitUntilInvokedInRenderMethod();
 	}
 

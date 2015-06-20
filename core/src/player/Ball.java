@@ -11,6 +11,7 @@ public class Ball implements IPosition {
 
 	private static final int velocityX = 100;
 	private static final int velocityY = 120;
+	
 	BallType type;
 	Texture texture;
 	Vector2 pos;
